@@ -1,22 +1,47 @@
-import {assert} from './common';
+import { assert } from "./common";
 
+/**
+ * 创建Proxy
+ * @param {*} data
+ * @param {*} cb
+ * @returns
+ */
+export function create(data, cb) {
+  assert(data, "data is required");
+  assert(cb, "data is required");
+  assert(typeof cb == "function", "cb must be function");
 
+  //递归回调
+  let res;
+  if (data instanceof Array) {
+    res = [];
+    for (let i = 0; i < data.length; i++) {
+      if (typeof data[i] == "object") {
+        res[i] = create(data[i], cb);
+      } else {
+        res[i] = data[i];
+      }
+    }
+  } else {
+    res = {};
+    for (let key in data) {
+      if (typeof data[key] == "object") {
+        res[key] = create(data[key], cb);
+      } else {
+        res[key] = data[key];
+      }
+    }
+  }
 
-export function create(data,cb){
-    assert(data,'data is required');
-    assert(cb,'data is required');
-    assert(typeof cb=='function','cb must be function');
-
-    
-    return new Proxy(data,{
-        get(data,name){
-           assert(data,[name]);
-           return data[name];
-        },
-        set(data,name,val){
-            data[name] =val;
-            cb(name);
-            return true;
-        }
-    });
+  return new Proxy(res, {
+    get(data, name) {
+      assert(data[name]);
+      return data[name];
+    },
+    set(data, name, val) {
+      data[name] = val;
+      cb(name);
+      return true;
+    },
+  });
 }
