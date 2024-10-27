@@ -8,10 +8,10 @@
 </head>
 <body>
     <!-- <h1>欢迎使用QVM  ^_^!</h1> -->
-    <div class="box aaa" @="aaa" v-show="aaa" :="55555" v-bind="6666" title="aa" id="a" :a="12" :a="5" v-bind:title="a" v-bind:value="b"  @click="fu(12,5)">
-        mumu123
+    <div id="root"  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a" v-bind:value="b"  @click="fn(12,5)">
+        mumu{{a}}123
         <text>sdfsd</text>
-        <!-- 注释 -->
+        <!-- sdffsdf -->
         <q-cmp a="12">
             <span>sdafd</span>
         </q-cmp>

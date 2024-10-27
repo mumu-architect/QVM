@@ -33,6 +33,7 @@ export function parseDOM(dom) {
       attrs,
       children,
       ishtml,
+      _blue: true,
     };
   } else if (dom.nodeType == document.TEXT_NODE) {
     let str = dom.data.trim();
@@ -41,6 +42,7 @@ export function parseDOM(dom) {
         type: "text",
         el: dom,
         data: str,
+        _blue: true,
       };
     } else {
       return undefined;
@@ -50,8 +52,8 @@ export function parseDOM(dom) {
 
 /**
  * 解析指令
- * @param {*} attrs 
- * @returns 
+ * @param {*} attrs
+ * @returns
  */
 export function parseDirectives(attrs) {
   assert(attrs);
@@ -93,4 +95,15 @@ export function parseDirectives(attrs) {
     }
   }
   return directives;
+}
+
+/**
+ * 解析事件on
+ * @param {*} directives
+ */
+export function parseListeners(directives) {
+  assert(directives);
+  assert(directives instanceof Array);
+
+  return directives.filter((directive) => directive.name == "on");
 }

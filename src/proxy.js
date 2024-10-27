@@ -6,7 +6,7 @@ import { assert } from "./common";
  * @param {*} cb
  * @returns
  */
-export function create(data, cb) {
+export function createProxy(data, cb) {
   assert(data, "data is required");
   assert(cb, "data is required");
   assert(typeof cb == "function", "cb must be function");
@@ -17,7 +17,7 @@ export function create(data, cb) {
     res = [];
     for (let i = 0; i < data.length; i++) {
       if (typeof data[i] == "object") {
-        res[i] = create(data[i], cb);
+        res[i] = createProxy(data[i], cb);
       } else {
         res[i] = data[i];
       }
@@ -26,7 +26,7 @@ export function create(data, cb) {
     res = {};
     for (let key in data) {
       if (typeof data[key] == "object") {
-        res[key] = create(data[key], cb);
+        res[key] = createProxy(data[key], cb);
       } else {
         res[key] = data[key];
       }
