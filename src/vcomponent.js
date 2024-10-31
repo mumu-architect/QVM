@@ -11,6 +11,13 @@ export default class VComponent extends VElement {
 
     super(options, component);
 
-    //
+    //标记初始化
+    this.state = "init";
+  }
+
+  render(){
+   //标记初始化
+   this.state = "update";
+   //
   }
 }

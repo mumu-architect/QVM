@@ -15,9 +15,15 @@ export default class Qvm {
 
     this.root = vdomTree;
     //创建数据代理
-    this._data = createProxy(options.data || {}, () => {
+    this._data = createProxy({ ...options.data, ...options.methods }, () => {
       this.render();
     });
+
+    //标记初始化
+    this.state = "init";
+
+    //初始渲染
+    this.render();
   }
 
   render() {
@@ -25,6 +31,6 @@ export default class Qvm {
     this.root.render();
 
     //渲染子集
-    this.root.$children.forEach((child) => child.render());
+    this.root.$children.forEach(child => child.render());
   }
 }

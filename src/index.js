@@ -53,12 +53,20 @@
 
 import Qvm from "./qvm";
 
-let vm = new Qvm({
+window.vm = new Qvm({
   el: "#root",
   data: {
     a: 12,
     b: 5,
+    show: false,
+    str:"<strong>bbbb</strong>",
+    html:"<strong>bbbb</strong>",
   },
+  methods:{
+    fn(){
+      alert('a');
+    }
+  }
 });
 
 console.log(vm);

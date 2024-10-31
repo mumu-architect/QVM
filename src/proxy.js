@@ -35,7 +35,7 @@ export function createProxy(data, cb) {
 
   return new Proxy(res, {
     get(data, name) {
-      assert(data[name]);
+      assert(data[name]!==undefined,`"${name}" is not defined`);
       return data[name];
     },
     set(data, name, val) {

@@ -59,9 +59,46 @@ export function expr(str, data) {
   });
 
   let str2 = arr2.join("");
-  console.log(str2);
+  //console.log(str2);
 
   return eval(str2);
+}
+
+export function compileStringTemplate(str, data) {
+  let s = 0;
+  //{{xxx}}
+  let arr = [];
+  let n = 0;
+  while ((n = str.indexOf("{{", s)) != -1) {
+    arr.push(str.substring(s, n));
+    let m = 2;
+    let e;
+    for (let i = n + 2; i < str.length; i++) {
+      if (str[i] == "{") {
+        m++;
+      } else if (str[i] == "}") {
+        m--;
+      }
+
+      if (m == 0) {
+        e=i;
+        break;
+      }
+    }
+
+    if(m>0){
+      throw new Error('{{}} does not match');
+    }
+
+    let strExpr=str.substring(n+2,e-1);
+    arr.push(expr(strExpr,data));
+    s=e+1;
+  }
+
+  arr.push(str.substring(s));
+
+  return arr.join('');
+
 }
 
 /**
@@ -83,7 +120,7 @@ function preseExpr(str) {
     while (1) {
       m = str.indexOf(str[n], m);
       if (m == -1) {
-        throw new Error("引号没配对");
+        throw new Error("The quotation marks are not paired");
       }
 
       if (str[m - 1] == "\\") {

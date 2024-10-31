@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mumu-架构师测试QVM</title>
-
-</head>
-<body>
+  </head>
+  <body>
     <!-- <h1>欢迎使用QVM  ^_^!</h1> -->
-    <div id="root"  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a" v-bind:value="b"  @click="fn(12,5)">
-        mumu{{a}}123
-        <text>sdfsd</text>
-        <!-- sdffsdf -->
-        <q-cmp a="12">
-            <span>sdafd</span>
-        </q-cmp>
-        <cmp></cmp>
-        <ul id="ul1">
-            <li></li>
-        </ul>
+    <!-- <div  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a+b" v-bind:value="b"  @click="fn(12,5)"> -->
+    <div id="root" class="box aaa" :title="a+b">
+      a={{a}},b={{b}}<br />
+      加在一起={{a+b}}<br />
+      <input type="text" v-bind:value="a+b" /><br />
+      <a href="javascript:;" @click="a++">a++</a><br />
+      <hr/>
+      <button type="button" @click="fn">按钮</button>
+      <div class="" v-html="html"></div>
+      <div class="" v-text="str"></div>
+      <span class="" v-show="show"> aaaaaaaaaaaa </span>
     </div>
-</body>
-<script src="/qvm.js" charset="UTF-8"></script>
+  </body>
+  <script src="/qvm.js" charset="UTF-8"></script>
 </html>

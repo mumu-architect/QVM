@@ -9,6 +9,9 @@ export default class VNode {
     assert(el instanceof Node);
     assert(component);
 
+    //标记初始化
+    this.state = "";
+
     this._el = el;
     this._component = component;
   }

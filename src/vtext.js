@@ -1,4 +1,5 @@
 import { assert } from "./common";
+import { compileStringTemplate } from "./expression";
 import VNode from "./vnode";
 
 /**
@@ -13,8 +14,21 @@ export default class VText extends VNode {
     super(options.el, component);
 
     //
-    this._data = options.data;
+    this._template = options.data;
+    //console.log(options.data);
+
+    //标记初始化
+    this.state='init';
   }
 
-  render() {}
+  render() {
+    let str = compileStringTemplate(this._template,this._component._data);
+   // console.log(str);
+    this._el.data=str;
+
+
+   //标记初始化
+   this.state = "update";
+
+  }
 }
