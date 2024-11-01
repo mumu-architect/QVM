@@ -6,7 +6,7 @@ import { assert } from "./common";
  * @param {*} cb
  * @returns
  */
-export function createProxy(data, cb) {
+export function createProxy(data,staticData, cb) {
   assert(data, "data is required");
   assert(cb, "data is required");
   assert(typeof cb == "function", "cb must be function");
@@ -17,7 +17,7 @@ export function createProxy(data, cb) {
     res = [];
     for (let i = 0; i < data.length; i++) {
       if (typeof data[i] == "object") {
-        res[i] = createProxy(data[i], cb);
+        res[i] = createProxy(data[i],staticData,cb);
       } else {
         res[i] = data[i];
       }
@@ -25,8 +25,10 @@ export function createProxy(data, cb) {
   } else {
     res = {};
     for (let key in data) {
+      assert(!key.startsWith('$'),'data key must not be $');
+
       if (typeof data[key] == "object") {
-        res[key] = createProxy(data[key], cb);
+        res[key] = createProxy(data[key],staticData,cb);
       } else {
         res[key] = data[key];
       }
@@ -35,11 +37,26 @@ export function createProxy(data, cb) {
 
   return new Proxy(res, {
     get(data, name) {
-      assert(data[name]!==undefined,`"${name}" is not defined`);
-      return data[name];
+      if(staticData[name]){
+        return staticData[name];
+      }else{
+        return data[name];
+      }
+      // if(name=='addObj'){
+      //   return function(name,val){
+      //     data[name] = val;
+      //   }.bind(res);
+      // }
+      //assert(data[name]!==undefined,`"${name}" is not defined`);
+    
     },
     set(data, name, val) {
-      data[name] = val;
+      if(typeof val=='object'){
+        data[name] =createProxy(val,staticData,cb);
+      }else{
+        data[name] = val;
+      }
+     
       cb(name);
       return true;
     },

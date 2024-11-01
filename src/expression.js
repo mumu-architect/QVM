@@ -91,7 +91,13 @@ export function compileStringTemplate(str, data) {
     }
 
     let strExpr=str.substring(n+2,e-1);
-    arr.push(expr(strExpr,data));
+    let result = expr(strExpr,data);
+    if(typeof result =='object'){
+      arr.push(JSON.stringify(result));
+    }else{
+      arr.push(result);
+    }
+   
     s=e+1;
   }
 

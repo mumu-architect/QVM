@@ -4,15 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mumu-架构师测试QVM</title>
+    <style media="screen">
+      *[v-cloak]{
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <!-- <h1>欢迎使用QVM  ^_^!</h1> -->
     <!-- <div  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a+b" v-bind:value="b"  @click="fn(12,5)"> -->
-    <div id="root" class="box aaa" :title="a+b">
+    <div id="root" class="box aaa" :title="a+b" v-cloak>
+
+      <div v-for="item,index in arr">
+        {{item}}
+      </div>
+
+      <br />
+      <br />
+      <button type="button" @click="fn5">显示隐藏</button>
+      <div v-if="show">内容内容内容内容内容内容内容内容</div>
+      <br />
+      <br />
+      <input v-href="https://www.baidu.com" type="text" />
+      <br />
+      <br />
+      {{12+5+fn3()}}
+      <br />
+      <br />
+      <input type="text" v-model="a"/>
+      <input type="text" v-model="a"/>
+      <input type="text" v-model="a"/>
+      <br />
+      <br />
+      {{a}}
+      <button type="button" @click="fn1()">按钮1</button>
+      <button type="button" @click="fn2()">按钮2</button><br />
       a={{a}},b={{b}}<br />
       加在一起={{a+b}}<br />
       <input type="text" v-bind:value="a+b" /><br />
-      <a href="javascript:;" @click="a++">a++</a><br />
+      <a href="javascript:;" @click="a=$event.clientX">a++</a><br />
       <hr/>
       <button type="button" @click="fn">按钮</button>
       <div class="" v-html="html"></div>

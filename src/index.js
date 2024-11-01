@@ -56,17 +56,55 @@ import Qvm from "./qvm";
 window.vm = new Qvm({
   el: "#root",
   data: {
+    arr:[12,5,8],
     a: 12,
     b: 5,
+    //$c:3,
     show: false,
     str:"<strong>bbbb</strong>",
     html:"<strong>bbbb</strong>",
+    json:{
+      a:12
+    }
   },
   methods:{
-    fn(){
-      alert('a');
+    fn5(){
+       this.show = !this.show;
+    },
+    fn3(){
+      return 33;
+    },
+    fn1(){
+      this.json.a=[12,5,8];
+    },
+    fn2(){
+      this.json.a.push(55);
+    },
+    fn(ev){
+      console.log(ev);
+    },
+  },
+  directives:{
+    href:{
+      init(velement,directive){
+        velement._el.onclick=function(){
+          window.open(directive.value);
+        };
+      },
+      update(velement,directive){
+        velement._el.style.background='red';
+      },
+      destroy() {
+        
+      }
     }
-  }
+  },
+  created(){
+    console.log('初始化完成');
+  },
+  updated(){
+    console.log('更新了');
+  },
 });
 
 console.log(vm);
