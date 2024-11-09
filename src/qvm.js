@@ -6,12 +6,17 @@ import directives from "./directives";
 import VElement from "./velement";
 import { Store } from "./qvmx";
 import { v4 as uuid } from "uuid";
+import EventQueue from "./event";
 
-export default class Qvm {
+export default class Qvm extends EventQueue {
   constructor(options) {
+    super();
     //存储多个watch
     this.__watch_target = [];
     this.$options = options;
+
+    //定义$refs
+    this.$refs = {};
 
     this.name = uuid();
 
@@ -21,7 +26,7 @@ export default class Qvm {
     if (options.store) {
       assert(options.store instanceof Store);
       this.$store = options.store;
-      options.store._qvm = options.store._qvm||this;
+      options.store._qvm = options.store._qvm || this;
     }
 
     //创建数据代理
@@ -30,15 +35,17 @@ export default class Qvm {
       __Qvm: this,
       //store连接到模板
       $store: options.store,
+      $emit: this.$emit.bind(this),
+      $on: this.$on.bind(this),
+      $refs: this.$refs,
     };
-
 
     //判断组件data为function
     let __data;
-    if(typeof options.data=='function'){
+    if (typeof options.data == "function") {
       __data = options.data();
-    }else{
-      __data=options.data;
+    } else {
+      __data = options.data;
     }
 
     this._data = createProxy(__data || {}, this._staticData, (path) => {
@@ -74,20 +81,21 @@ export default class Qvm {
     } else {
       el = options.el;
     }
- 
+
     //创建component组件
-    let vdomTree = this.createComponent(el,this);
+    let vdomTree = this.createComponent(el, this);
 
     //存储created，updated初始换方法
     this.created = options.created;
     this.updated = options.updated;
+    this.mounted = options.mounted;
 
     this.root = vdomTree;
 
-    //router 
-    if(options.router){
+    //router
+    if (options.router) {
       let router = options.router;
-      router._qvm=this;
+      router._qvm = this;
       //初始化
       router.init();
       this.$router = router;
@@ -105,10 +113,17 @@ export default class Qvm {
     this._render_timer = 0;
     //初始渲染--update
     this.render();
+
+    //生命周期，组件已经被成功渲染过了
+    this.mounted && this.mounted.call(this._data);
+
     return this._data;
   }
 
- 
+  init() {
+    console.log("init");
+  }
+
   //执行computed方法
   _doCompute() {
     const options = this.$options;
@@ -143,89 +158,105 @@ export default class Qvm {
     this.updated && this.updated.call(this._data);
   }
 
-   /**
-    * 创建组件component
-    * @param {*} el 
-    * @param {*} qvm 
-    * @returns 
-    */
-   createComponent(el,qvm){
-   //解析dom
-   let domTree = parseDOM(el);
-   //创建虚拟dom
-   let vdomTree = createVDom(domTree, this, this);
+  /**
+   * 创建组件component
+   * @param {*} el
+   * @param {*} qvm
+   * @returns
+   */
+  createComponent(el, qvm) {
+    //解析dom
+    let domTree = parseDOM(el);
+    //查找ref
+    function findRef(node) {
+      if (!node.attrs) {
+        return;
+      }
+      if (node.attrs.ref) {
+        node.ref = node.attrs.ref;
+      }
 
-   //查找dom中的component
-   let findAndCreateComponent = (node, parent) => {
-     if (node._blue) {
-       //拼接外部组件component
-       let component;
-       if (node.tag != "component") {
-         component = qvm.components[node.tag] || components[node.tag];
-         assert(component, `no "${node.tag}" component found`);
-       } else {
-         assert(node.attrs.is, `no "is" attribute`);
-         component =
-         qvm.components[node.attrs.is] || componets[node.attrs.is];
-         assert(component, `no "${node.tag}" component found`);
-       }
+      node.children.forEach((child) => {
+        findRef(child);
+      });
+    }
+    findRef(domTree);
+    //创建虚拟dom
+    let vdomTree = createVDom(domTree, this, this);
 
-       assert(
-         component.template !== undefined,
-         `"${node.tag}" component no template attribute`
-       );
-       let oDiv = document.createElement("div");
-       oDiv.innerHTML = component.template;
-       assert(
-         oDiv.children.length == 1,
-         `component template must be has a root element`
-       );
+    //查找dom中的component
+    let findAndCreateComponent = (node, parent) => {
+      if (node._blue) {
+        //拼接外部组件component
+        let component;
+        if (node.tag != "component") {
+          component = qvm.components[node.tag] || components[node.tag];
+          assert(component, `no "${node.tag}" component found`);
+        } else {
+          assert(node.attrs.is, `no "is" attribute`);
+          component = qvm.components[node.attrs.is] || componets[node.attrs.is];
+          assert(component, `no "${node.tag}" component found`);
+        }
 
-       //slot位置标记
-       let slots = oDiv.getElementsByTagName("slot");
-       Array.from(slots).forEach((slot) => {
-         let fragment = document.createDocumentFragment();
-         node.children.forEach((child) => {
-           fragment.appendChild(child.el.cloneNode(true));
-         });
-         slot.parentNode.replaceChild(fragment, slot);
-       });
+        assert(
+          component.template !== undefined,
+          `"${node.tag}" component no template attribute`
+        );
+        let oDiv = document.createElement("div");
+        oDiv.innerHTML = component.template;
+        assert(
+          oDiv.children.length == 1,
+          `component template must be has a root element`
+        );
 
-       let root = oDiv.children[0];
-       node.el.parentNode.replaceChild(root, node.el);
+        //slot位置标记
+        let slots = oDiv.getElementsByTagName("slot");
+        Array.from(slots).forEach((slot) => {
+          let fragment = document.createDocumentFragment();
+          node.children.forEach((child) => {
+            fragment.appendChild(child.el.cloneNode(true));
+          });
+          slot.parentNode.replaceChild(fragment, slot);
+        });
 
-       let cmp = new Qvm({
-         el: root,
-         ...component,
-         store: qvm.$store,
-       }).__Qvm;
+        let root = oDiv.children[0];
+        node.el.parentNode.replaceChild(root, node.el);
 
-       cmp.$root = cmp;
+        let cmp = new Qvm({
+          el: root,
+          ...component,
+          store: qvm.$store,
+        }).__Qvm;
 
-       //TOTD:props未测试
-       component.props &&
-         component.props.forEach((name) => {
-           cmp._data[name] = node.attrs[name];
-         });
+        cmp.$root = cmp;
+        //获取ref，执行ref
+        if (node.ref) {
+          qvm.$refs[node.ref] = cmp;
+        }
 
-       return cmp;
+        //TOTD:props未测试
+        component.props &&
+          component.props.forEach((name) => {
+            cmp._data[name] = node.attrs[name];
+          });
 
+        return cmp;
 
-       //return this._createComponent(component); 
-     } else {
-       if (node instanceof VElement) {
-         for (let i = 0; i < node.$children.length; i++) {
-           node.$children[i] = findAndCreateComponent(node.$children[i], node);
-         }
-       }
-       return node;
-     }
-   };
-   //查找dom中的component
-   vdomTree = findAndCreateComponent(vdomTree, this);
-   return vdomTree;
-   }
-};
+        //return this._createComponent(component);
+      } else {
+        if (node instanceof VElement) {
+          for (let i = 0; i < node.$children.length; i++) {
+            node.$children[i] = findAndCreateComponent(node.$children[i], node);
+          }
+        }
+        return node;
+      }
+    };
+    //查找dom中的component
+    vdomTree = findAndCreateComponent(vdomTree, this);
+    return vdomTree;
+  }
+}
 
 //外部调用组件
 let components = {};

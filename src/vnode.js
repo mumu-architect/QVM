@@ -1,11 +1,13 @@
 import { assert } from "./common";
 import { v4 as uuid} from "uuid";
+import EventQueue from "./event";
 
 /**
  * 虚拟节点元素类
  */
-export default class VNode {
+export default class VNode extends EventQueue {
   constructor(el, parent) {
+    super();
     assert(el);
     assert(el instanceof Node);
 

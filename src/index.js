@@ -63,7 +63,6 @@
 //   `
 // });
 
-
 // window.vm = new Qvm({
 //   el: "#root",
 //   data: {
@@ -120,7 +119,6 @@
 
 // console.log(vm);
 
-
 //5.store调用
 // import Qvm from "./qvm";
 // import {Store} from "./qvmx"
@@ -176,7 +174,6 @@
 // });
 // window.store=store;
 
-
 // window.vm = new Qvm({
 //   el: "#root",
 //   data: {
@@ -195,54 +192,86 @@
 
 // console.log(vm);
 
-
 //6.router
+// import Qvm from "./qvm";
+// import Router from "./qvm-router";
+
+// Qvm.component('cmp1',{
+//   template:`
+//   <div>
+//   组件1
+//   </div>
+//   `,
+//   created(){
+//     //alert('cmp1');
+//   }
+// });
+
+// Qvm.component('cmp2',{
+//   template:`
+//   <div>
+//   组件2
+//   </div>
+//   `
+// });
+// let router = new Router({
+//   routes:[
+//     {path:'/a',component:'cmp1',meta:{name:'blue1'}},
+//     {path:'/b',component:'cmp2',meta:{name:'blue2'}},
+//     {path:'/c',component:'c',meta:{name:'blue3'}},
+//   ]
+// })
+
+// window.vm = new Qvm({
+//   el: "#root",
+//   data: {
+//     arr:[12,5,8],
+//     a: 12,
+//     b: 5,
+//     c:3,
+//   },
+//   router,
+//   components:{
+//     'c':{
+//       template:`<div>cccccc</div>`
+//     }
+//   }
+// });
+
+// console.log(vm);
+
 import Qvm from "./qvm";
-import Router from "./qvm-router";
 
-
-Qvm.component('cmp1',{
-  template:`
+Qvm.component("cmp1", {
+  template: `
   <div>
-  组件1
+  <button @click="$emit('abc',12,5)">触发</button>
   </div>
   `,
-  created(){
-    //alert('cmp1');
-  }
+  created() {
+    this.$on("aaakkk", sum => {
+      console.log("sum", sum);
+    });
+  },
 });
-
-Qvm.component('cmp2',{
-  template:`
-  <div>
-  组件2
-  </div>
-  `
-});
-let router = new Router({
-  routes:[
-    {path:'/a',component:'cmp1',meta:{name:'blue1'}},
-    {path:'/b',component:'cmp2',meta:{name:'blue2'}},
-    {path:'/c',component:'c',meta:{name:'blue3'}},
-  ]
-})
 
 window.vm = new Qvm({
   el: "#root",
   data: {
-    arr:[12,5,8],
+    arr: [12, 5, 8],
     a: 12,
     b: 5,
-    c:3,
+    c: 3,
   },
-  router,
-  components:{
-    'c':{
-      template:`<div>cccccc</div>`
-    }
-  }
+  mounted() {
+    this.$refs.ccc.$on("abc", (a,b) => {
+      alert("aaaa");
+      console.log(a, b);
+    });
+    setInterval(() => {
+      this.$refs.ccc.$emit('aaakkk',88);
+    }, 200);
+  },
 });
 
 console.log(vm);
-
-
