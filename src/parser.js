@@ -90,8 +90,28 @@ export function parseDirectives(attrs) {
         "event name is not defined " + key
       );
 
-      directive.value = attrs[key];
-      directives.push(directive);
+      //v-model = "a"
+      //{name:'model',arg:undefined,value=>attrs[key]}
+      //:value="a" +@input="value="a=value$event.target.value"
+      //@input="value=$event.target"
+      if(directive.name=='model'){
+        directives.push({
+          name:'on',
+          arg:'input',
+          value:`${attrs[key]}=$event.target.value`,
+          meta:{}
+        });
+        directives.push({
+          name:'bind',
+          arg:'value',
+          value:attrs[key],
+          meta:{}
+        });
+      }else{
+        directive.meta={};
+        directive.value = attrs[key];
+        directives.push(directive);
+      }
     }
   }
   return directives;

@@ -1,6 +1,5 @@
 import { assert } from "./common";
 import { expr } from "./expression";
-import { createVDom } from "./vdom";
 import VElement from "./velement";
 
 /**
@@ -9,7 +8,9 @@ import VElement from "./velement";
 export default {
   //{name:"bind",arg:"title",value:"a+b"}
   bind: {
-    init: null,
+    init(velement, directive) {
+      directive.meta._last_data = "";
+    },
     update(velement, directive) {
       assert(velement);
       assert(velement instanceof VElement);
@@ -17,10 +18,17 @@ export default {
       assert(directive.arg);
       assert(directive.value);
 
-      let res = expr(directive.value, velement._component._data);
+      let res = expr(directive.value, velement._proxy);
       //console.log(directive.arg,res);
-      velement._el.setAttribute(directive.arg, res);
-      velement._el[directive.arg]=res;
+
+      if (directive.meta._last_data != res) {
+        velement._el.setAttribute(directive.arg, res);
+        velement._el[directive.arg] = res;
+
+        directive.meta._last_data = res;
+
+        console.log("[velement rendered]", velement.name);
+      }
     },
     destory: null,
   },
@@ -45,8 +53,8 @@ export default {
             str += "($event)";
           }
           //velement._component._data.addObj('$event',ev);
-          velement._component._staticData.$event=ev;
-          expr(str, velement._component._data);
+          velement._set('$event',ev);
+          expr(str, velement._proxy);
         },
         false
       );
@@ -54,23 +62,13 @@ export default {
     update: null,
     destory() {},
   },
-  //{name:"model",arg:undefined,value:"a"}
-  model: {
-    init(velement, directive){
-      velement.$directives.push({name:'bind',arg:'value',value:directive.value});
-      velement.$directives.push({name:'on',arg:'input',value:`${directive.value}=$event.target.value`});
-
-    },
-    update: null,
-    destory:null,
-  },
   //屏蔽页面执行数据转换，数据转化完统一展示
-  cloak:{
-    init:null,
-    update(velement){
-      velement._el.removeAttribute('v-cloak');
+  cloak: {
+    init: null,
+    update(velement) {
+      velement._el.removeAttribute("v-cloak");
     },
-    destory:null
+    destory: null,
   },
   //{name:"show",arg:undefined,value:"show"}
   show: {
@@ -81,7 +79,7 @@ export default {
       assert(directive);
       assert(directive.value);
 
-      let res = expr(directive.value, velement._component._data);
+      let res = expr(directive.value, velement._data);
       if (res) {
         velement._el.style.display = "";
       } else {
@@ -90,107 +88,136 @@ export default {
     },
     destory: null,
   },
-  'if':{
-    init(velement, directive){
-      let holder = document.createComment('qvm holder');
-      velement.__parent=velement._el.parentNode;
-      velement.__holder=holder;
-      velement.__el=velement._el;
+  if: {
+    init(velement, directive) {
+      let holder = document.createComment("qvm holder");
+      velement.__parent = velement._el.parentNode;
+      velement.__holder = holder;
+      velement.__el = velement._el;
     },
     update(velement, directive) {
-      let res = expr(directive.value,velement._component._data);
+      let res = expr(directive.value, velement._data);
 
-      if(res){
-        if(velement.__holder.parentNode){
-          velement.__parent.replaceChild(
-            velement.__el,
-            velement.__holder
-          );
+      if (res) {
+        if (velement.__holder.parentNode) {
+          velement.__parent.replaceChild(velement.__el, velement.__holder);
         }
-      }else{
-        velement.__parent.replaceChild(
-          velement.__holder,
-          velement.__el
-        );
+      } else {
+        velement.__parent.replaceChild(velement.__holder, velement.__el);
       }
     },
-    destory(velement, directive) {
-
-    }
+    destory(velement, directive) {},
   },
-  "else-if":{
-    init(velement, directive){
-
-    },
-    update(velement, directive) {
-
-    },
-    destory(velement, directive) {
-      
-    }
+  "else-if": {
+    init(velement, directive) {},
+    update(velement, directive) {},
+    destory(velement, directive) {},
   },
-  'else':{
-    init(velement, directive){
-
-    },
-    update(velement, directive) {
-
-    },
-    destory(velement, directive) {
-      
-    }
+  else: {
+    init(velement, directive) {},
+    update(velement, directive) {},
+    destory(velement, directive) {},
   },
-  'for':{
-    init(velement, directive){
-      let holder = document.createComment('for holder');
-      velement._for_el=velement._el;
-      velement.__for_holder = holder;
-      velement.__for_parent=velement._el.parentNode;
+  for: {
+    init(velement, directive) {
+      //删除等于directive的指令v-for
+      velement.$directives.filter((item) => item != directive);
 
-      velement._el.parentNode.replaceChild(holder,velement._el);
+      directive.meta = {};
+      let template = (directive.meta.template = velement);
+      let parentNode = (directive.meta.parent = velement._el.parentNode);
 
-      velement.__for_elements=[];
+      let holder = (directive.meta.holder =
+        document.createComment("for holder"));
+      parentNode.replaceChild(holder, template._el);
 
+      //存储克隆模板
+      directive.meta.elements = [];
 
+      //上一次的数据
+      let last = [];
+
+      //
+      velement.render = function () {
+        const template = directive.meta.template;
+        const parentNode = directive.meta.parent;
+        const holder = directive.meta.holder;
+        //存储克隆模板
+        let elements = directive.meta.elements;
+
+        //删除
+        //1.数据没变--原始velement直接拿过来
+        //2.数据删了--原始velement留着备用
+        //3.数据添加--优先使用备用velement，创建新的
+        let oldElements = [...elements];
+        elements.forEach((element) => {
+          parentNode.removeChild(element._el);
+        });
+        elements.length = 0;
+
+        //
+        let newElements = [];
+
+        let { key, value, data } = parseFor(directive.value);
+
+        last = [...last];
+
+        //console.log("last:", last);
+
+        let iter = expr(data, velement._proxy);
+
+        //diff
+        newElements.length = iter.length;
+
+        for (let i = 0; i < iter.length; i++) {
+          let item = iter[i];
+          let index = i;
+          let n = last.findIndex(i=>i==item);
+          if (n != -1) {
+            newElements[index] = oldElements[n];
+            oldElements.splice(n, 1);
+            last.splice(n, 1);
+          } else {
+            newElements[index] = null;
+          }
+        }
+
+        newElements.forEach((item, index) => {
+          if (item != null) {
+            return;
+          }
+          if (oldElements.length > 0) {
+            newElements[index] = oldElements.pop();
+          } else {
+            newElements[index] = template.clone();
+            newElements[index].init();
+          }
+        });
+
+        last = iter;
+        //存储克隆模板
+        elements = newElements;
+
+        let fragment = document.createDocumentFragment();
+        newElements.forEach((element, index) => {
+          key && element._set(key, index);
+          element._set(value, iter[index]);
+
+          fragment.appendChild(element._el);
+        });
+        parentNode.insertBefore(fragment,holder);
+
+        elements.forEach((velement) => {
+          //console.log(velement);
+          //velement.$root.forceUpdate();
+          velement.render();
+        });
+
+        directive.meta.elements = elements;
+      };
     },
-    update(velement, directive) {
-      //TOTD
-      velement.__for_elements.forEach(child=>{
-        velement.__for_parent.removeChild(child);
-      });
-      velement.__for_elements=[];
-
-      let [str,dataName] = directive.value.split(' in ');
-      let [valueName,keyName] = str.split(',');
-
-      //1.循环数据
-      data = expr(dataName,velement._component._data);
-      //2.
-      let fragment = document.createDocumentFragment();
-      for(let i in data){
-        let value=data[i];
-        let childNode = velement._for_el.cloneNode(true);
-
-        //创建虚拟dom
-        let child = createVDom(child,velement._component);
-
-        fragment.appendChild(child._el);
-        velement.__for_elements.push(child._el);
-      }
-
-
-      velement.__for_parent.insertBefore(fragment,element.__for_holder);
-
-
-      velement.__for_parent.replaceChild(fragment,velement.__for_holder);
-
-      console.log(str,key,value,data);
-
-
-    },
-    destory(velement, directive) {
-      
-    }
+    update(velement, directive) {},
+    destory(velement, directive) {},
   },
   //{name:"html",arg:undefined,value:"show"}
   html: {
@@ -201,7 +228,7 @@ export default {
       assert(directive);
       assert(directive.value);
 
-      let res = expr(directive.value, velement._component._data);
+      let res = expr(directive.value, velement._data);
       velement._el.innerHTML = res;
     },
     destory: null,
@@ -215,7 +242,7 @@ export default {
       assert(directive);
       assert(directive.value);
 
-      let res = expr(directive.value, velement._component._data);
+      let res = expr(directive.value, velement._data);
       let node = document.createTextNode(res);
       velement._el.innerHTML = "";
       velement._el.appendChild(node);
@@ -223,3 +250,22 @@ export default {
     destory: null,
   },
 };
+
+/**
+ * 解析for-in
+ * @param {*} str
+ * @returns
+ */
+function parseFor(str) {
+  //str=>'xxx in arr'
+  //str=>'xxx,xx in xx'
+
+  let arr = str.split(" in ");
+  let [value, key] = arr[0].split(",");
+
+  return {
+    key,
+    value,
+    data: arr[1],
+  };
+}

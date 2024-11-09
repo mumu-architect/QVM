@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mumu-架构师测试QVM</title>
     <style media="screen">
-      *[v-cloak]{
+      *[v-cloak] {
         display: none;
       }
     </style>
@@ -13,15 +13,62 @@
   <body>
     <!-- <h1>欢迎使用QVM  ^_^!</h1> -->
     <!-- <div  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a+b" v-bind:value="b"  @click="fn(12,5)"> -->
-    <div id="root" class="box aaa" :title="a+b" v-cloak>
+    <div id="root" v-cloak>
+      <!-- router -->
+      <router-link to="/a">页面1</router-link>
+      <router-link to="/b">页面2</router-link>
+      <router-link to="/c">页面3</router-link>
+      {{$route.path}} {{$route.meta}}
+      <router-view></router-view>
+      <router-view></router-view>
+      <router-view></router-view>
+      <!-- sore调用 -->
+      <!-- <cmp1></cmp1>
+      <cmp2></cmp2>
+      <button type="button" @click="$store.dispatch('setA',9999)">外部调用store</button> -->
 
-      <div v-for="item,index in arr">
-        {{item}}
-      </div>
+      <!-- 组件中的select默认选不中 -->
+      <!-- <cmp2>
+        <select>
+          <option  :selected="index==1?'true':''" v-for="item,index in arr" >{{item}}</option>
+        </select>
+        <div>123456
+          <ul>
+            <li>aaa</li>
+            <li>bbb</li>
+          </ul>
+        </div>
+      </cmp2> -->
 
-      <br />
-      <br />
-      <button type="button" @click="fn5">显示隐藏</button>
+      <!-- select 循环默认选中 -->
+      <!-- <select>
+        <option  :selected="index==1?'true':''" v-for="item,index in arr" >{{item}}</option>
+      </select> -->
+      <!-- component -->
+      <!-- <div>
+        <cmp>11</cmp>
+      </div> -->
+
+      <!-- computed -->
+      <!-- {{a}}+{{b}}={{sum}} -->
+
+      <!-- watch -->
+      <!-- {{a}}--{{b}}
+      <button type="button" @click="fn6()">按钮</button> -->
+
+      <!-- for+model -->
+      <!-- {{arr}}
+       <div v-for="item,index in arr" >
+        <input type="text"  v-model="arr[index]">
+      </div> -->
+
+      <!-- for -->
+      <!-- <div v-for="item,index in arr" >
+        {{item}}--{{index}}
+      </div> -->
+
+      <!-- on -->
+      <!-- <button type="button" @click="fn5">显示隐藏</button>
       <div v-if="show">内容内容内容内容内容内容内容内容</div>
       <br />
       <br />
@@ -47,7 +94,7 @@
       <button type="button" @click="fn">按钮</button>
       <div class="" v-html="html"></div>
       <div class="" v-text="str"></div>
-      <span class="" v-show="show"> aaaaaaaaaaaa </span>
+      <span class="" v-show="show"> aaaaaaaaaaaa </span> -->
     </div>
   </body>
   <script src="/qvm.js" charset="UTF-8"></script>

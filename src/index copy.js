@@ -122,61 +122,82 @@
 
 
 //5.store调用
+import Qvm from "./qvm";
+import {Store} from "./qvmx"
+
+Qvm.component('cmp1',{
+  data(){
+    return{
+      a:99
+    }
+  },
+  methods:{
+    fn(){
+      this.a++;
+    }
+  },
+  template:`
+  <div>
+  <button type="button"  @click="fn">按钮</button>
+{{a}}
+  a={{$store.state.a}}
+  </div>
+  `
+});
+
+Qvm.component('cmp2',{
+  template:`
+  <div>
+  <button type="button"  @click="fn()">按钮</button>
+  </div>
+  `,
+  methods:{
+    fn(){
+      this.$store.dispatch('setA',88);
+    }
+  }
+});
+
+let store=new Store({
+  strict:true,//生成环境改为false
+  state:{
+    a:12,b:5
+  },
+  mutations:{
+    setA(state,a){
+      state.a=a;
+    }
+  },
+  actions:{
+    setA(store,a){
+      store.commit('setA',a);
+    }
+  }
+});
+window.store=store;
+
+
+window.vm = new Qvm({
+  el: "#root",
+  data: {
+    arr:[12,5,8],
+    a: 12,
+    b: 5,
+    c:3,
+  },
+  store,
+  methods:{
+    fn(){
+      alert(111);
+    }
+  }
+});
+
+console.log(vm);
+
+
+//6.
 // import Qvm from "./qvm";
-// import {Store} from "./qvmx"
-
-// Qvm.component('cmp1',{
-//   data(){
-//     return{
-//       a:99
-//     }
-//   },
-//   methods:{
-//     fn(){
-//       this.a++;
-//     }
-//   },
-//   template:`
-//   <div>
-//   <button type="button"  @click="fn">按钮</button>
-// {{a}}
-//   a={{$store.state.a}}
-//   </div>
-//   `
-// });
-
-// Qvm.component('cmp2',{
-//   template:`
-//   <div>
-//   <button type="button"  @click="fn()">按钮</button>
-//   </div>
-//   `,
-//   methods:{
-//     fn(){
-//       this.$store.dispatch('setA',88);
-//     }
-//   }
-// });
-
-// let store=new Store({
-//   strict:true,//生成环境改为false
-//   state:{
-//     a:12,b:5
-//   },
-//   mutations:{
-//     setA(state,a){
-//       state.a=a;
-//     }
-//   },
-//   actions:{
-//     setA(store,a){
-//       store.commit('setA',a);
-//     }
-//   }
-// });
-// window.store=store;
-
-
 // window.vm = new Qvm({
 //   el: "#root",
 //   data: {
@@ -194,55 +215,5 @@
 // });
 
 // console.log(vm);
-
-
-//6.router
-import Qvm from "./qvm";
-import Router from "./qvm-router";
-
-
-Qvm.component('cmp1',{
-  template:`
-  <div>
-  组件1
-  </div>
-  `,
-  created(){
-    //alert('cmp1');
-  }
-});
-
-Qvm.component('cmp2',{
-  template:`
-  <div>
-  组件2
-  </div>
-  `
-});
-let router = new Router({
-  routes:[
-    {path:'/a',component:'cmp1',meta:{name:'blue1'}},
-    {path:'/b',component:'cmp2',meta:{name:'blue2'}},
-    {path:'/c',component:'c',meta:{name:'blue3'}},
-  ]
-})
-
-window.vm = new Qvm({
-  el: "#root",
-  data: {
-    arr:[12,5,8],
-    a: 12,
-    b: 5,
-    c:3,
-  },
-  router,
-  components:{
-    'c':{
-      template:`<div>cccccc</div>`
-    }
-  }
-});
-
-console.log(vm);
 
 

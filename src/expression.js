@@ -19,6 +19,12 @@ const keyword = {
  * @param {*} data
  */
 export function expr(str, data) {
+  //TODO:filters未开发
+  // assert(filters);
+  // let strArr=str.split('|');
+  // str = strArr[0];
+
+
   /**
    * 判断是否全局变量
    * @param {*} s
@@ -61,10 +67,22 @@ export function expr(str, data) {
   let str2 = arr2.join("");
   //console.log(str2);
 
-  return eval(str2);
+  let result =  eval(str2);
+
+  // //过滤
+  //  strArr.slice(1).forEach(name=>{
+  //   result=filters[name](result);
+  //  });
+
+   return result
+
+
 }
 
 export function compileStringTemplate(str, data) {
+
+  //assert(filters);
+  
   let s = 0;
   //{{xxx}}
   let arr = [];

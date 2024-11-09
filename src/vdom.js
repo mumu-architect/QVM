@@ -1,8 +1,6 @@
 import VElement from "./velement";
 import VText from "./vtext";
-import VComponent from "./vcomponent";
 import { assert } from "./common";
-import Qvm from "./qvm";
 
 /**
  * 创建虚拟dom
@@ -10,29 +8,35 @@ import Qvm from "./qvm";
  * @param {*} component
  * @returns
  */
-export function createVDom(node, component) {
+export function createVDom(node, parent, component) {
   assert(node);
   assert(node._blue);
   assert(node.type == "element" || node.type == "text");
-  assert(component);
-  assert(component instanceof VComponent || component instanceof Qvm);
 
   if (node.type == "element") {
-    let parent;
     if (node.ishtml) {
       //VElement
-      parent = new VElement(node, component);
-    } else {
-      //VComponent
-      parent = new VComponent(node, component);
-    }
+      let ele = new VElement(node, parent);
+      ele.$children = node.children.map((child) => {
+        return createVDom(child, ele, component);
+      });
 
-    parent.$children = node.children.map((child) =>
-      createVDom(child, component)
-    );
-    return parent;
+      ele.$root = component;
+
+      return ele;
+    } else {
+      // //VComponent
+      // let cmp = new VComponent(node, parent);
+      // cmp.$children = node.children.map(child =>{
+      //   return createVDom(child,cmp,cmp);
+      // });
+      // //cmp.$root=cmp;
+      // return cmp;
+
+      return node;
+    }
   } else {
     //VText
-    return new VText(node, component);
+    return new VText(node, parent);
   }
 }
