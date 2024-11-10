@@ -14,7 +14,6 @@ module.exports=function(env={}){
             //sourceMapFilename: dev?'qvm.map':'qvm.min.map',
             libraryTarget: 'umd'//umd模块
         },
-
         module:{
             rules:[
                 {test:/\.js$/i,use:[
@@ -24,10 +23,11 @@ module.exports=function(env={}){
                             presets:['@babel/preset-env']
                         }
                     },
-                    ...dev?[]:{
-                        //正式打包取消alert函数，assert
-                        loader:Strip.loader('alert','assert')
-                    },
+                    // {
+                    //     //正式打包打开此模块
+                    //     //正式打包取消alert函数，assert
+                    //     loader:Strip.loader('alert','assert')
+                    // }
                 ]}
             ]
         },

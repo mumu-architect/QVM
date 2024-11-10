@@ -58,9 +58,7 @@ export function parseDOM(dom) {
 export function parseDirectives(attrs) {
   assert(attrs);
   assert(attrs.constructor == Object);
-
   let directives = [];
-
   //v-
   //: v-bind:xxx
   //@ v-on:xxx
@@ -71,7 +69,6 @@ export function parseDirectives(attrs) {
       //名字：参数
       let [name, arg] = key.split(":");
       directive = { name: name.replace(/^v\-/, ""), arg };
-
       //:title
     } else if (key.startsWith(":")) {
       directive = { name: "bind", arg: key.substring(1) };
@@ -82,33 +79,35 @@ export function parseDirectives(attrs) {
 
     if (directive) {
       assert(
-        (directive.name == "bind" && directive.arg) || directive.name != "bind",
-        "not defined what to bind " + key
+        directive.name == "bind" && directive.arg || directive.name != "bind",
+        `not defined what to bind ${key}`
       );
       assert(
-        (directive.name == "on" && directive.arg) || directive.name != "on",
-        "event name is not defined " + key
+        directive.name == "on" && directive.arg || directive.name != "on",
+        `event name is not defined  ${key}`
       );
+      /*
+      v-model = "a"
+      {name:'model',arg:undefined,value=>attrs[key]}
+      :value="a" +@input="value="a=value$event.target.value"
+      @input="value=$event.target"
+      */
 
-      //v-model = "a"
-      //{name:'model',arg:undefined,value=>attrs[key]}
-      //:value="a" +@input="value="a=value$event.target.value"
-      //@input="value=$event.target"
-      if(directive.name=='model'){
+      if (directive.name == "model") {
         directives.push({
-          name:'on',
-          arg:'input',
-          value:`${attrs[key]}=$event.target.value`,
-          meta:{}
+          name: "on",
+          arg: "input",
+          value: `${attrs[key]}=$event.target.value`,
+          meta: {},
         });
         directives.push({
-          name:'bind',
-          arg:'value',
-          value:attrs[key],
-          meta:{}
+          name: "bind",
+          arg: "value",
+          value: attrs[key],
+          meta: {},
         });
-      }else{
-        directive.meta={};
+      } else {
+        directive.meta = {};
         directive.value = attrs[key];
         directives.push(directive);
       }
@@ -124,6 +123,5 @@ export function parseDirectives(attrs) {
 export function parseListeners(directives) {
   assert(directives);
   assert(directives instanceof Array);
-
   return directives.filter((directive) => directive.name == "on");
 }
