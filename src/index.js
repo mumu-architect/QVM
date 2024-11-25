@@ -81,15 +81,6 @@
 //       arr:[1,2,3]
 //     }
 //   },
-//   filters:{
-//     currency(input){
-//       return '￥'+Number(input).toFixed(2);
-//     },
-//     mkdate(input){
-//       let oDate=new Date(input);
-//       return oDate.getFullYear()+'-'+oDate.getDate();
-//     }
-//   },
 //   components:{
 //     cmp:{
 //       props:['a'],
@@ -239,38 +230,84 @@
 // });
 
 // console.log(vm);
+//7.ref="ccc"调用
+// import Qvm from "./qvm";
 
+// Qvm.component("cmp1", {
+//   template: `
+//   <div>
+//   <button @click="$emit('abc',12,5)">触发</button>
+//   </div>
+//   `,
+//   created() {
+//     this.$on("aaakkk", sum => {
+//       console.log("sum", sum);
+//     });
+//   },
+// });
+
+// window.vm = new Qvm({
+//   el: "#root",
+//   data: {
+//     arr: [12, 5, 8],
+//     a: 12,
+//     b: 5,
+//     c: 3,
+//   },
+//   mounted() {
+//     this.$refs.ccc.$on("abc", (a,b) => {
+//       alert("aaaa");
+//       console.log(a, b);
+//     });
+//     setInterval(() => {
+//       this.$refs.ccc.$emit('aaakkk',88);
+//     }, 200);
+//   },
+// });
+
+// console.log(vm);
+
+
+//8.filter过滤
+// mounted(){
+//   //过滤执行方法
+//   this.getArr();
+//   this.getFilterArr();
+//   console.log('mounted完成');
+// },
 import Qvm from "./qvm";
-
-Qvm.component("cmp1", {
-  template: `
-  <div>
-  <button @click="$emit('abc',12,5)">触发</button>
-  </div>
-  `,
-  created() {
-    this.$on("aaakkk", sum => {
-      console.log("sum", sum);
-    });
-  },
-});
 
 window.vm = new Qvm({
   el: "#root",
   data: {
-    arr: [12, 5, 8],
-    a: 12,
-    b: 5,
-    c: 3,
+    arr: [],
+    filterArr:[],
+    filterValue: {id:3,money:100},
+    a:5,
+    b:3
   },
-  mounted() {
-    this.$refs.ccc.$on("abc", (a,b) => {
-      alert("aaaa");
-      console.log(a, b);
-    });
-    setInterval(() => {
-      this.$refs.ccc.$emit('aaakkk',88);
-    }, 200);
+  mounted(){
+    //过滤执行方法
+    this.getArr();
+    this.getFilterArr();
+    console.log('mounted完成');
+  },
+  methods:{
+   //获取数据
+    getArr(){
+      this.arr = [{id:1,money:23},{id:2,money:54},{id:3,money:58},{id:4,money:100},{id:5,money:200},{id:6,money:300}];
+    },
+     //过滤方法
+    getFilterArr(){
+      this.filterArr=this.arr.filter(item=>item.id>this.filterValue.id&&item.money>this.filterValue.money);
+    }
+
+  },
+  created(){
+    console.log('初始化完成created');
+  },
+  updated(){
+    console.log('更新了updated');
   },
 });
 

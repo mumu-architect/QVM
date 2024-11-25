@@ -10,9 +10,15 @@ module.exports=function(env={}){
         entry: dev?'./src/index.js':'./src/qvm.js',
         output:{
             path: path.resolve(__dirname,'dist'),
-            filename: dev?'qvm.js':'qvm.js',
+            filename: dev?'qvm.js':'qvm.min.js',
             //sourceMapFilename: dev?'qvm.map':'qvm.min.map',
-            libraryTarget: 'umd'//umd模块
+            //libraryTarget: 'umd'//umd模块
+            library: {
+                // 库的名称
+                name: 'Qvm',
+                // 库的类型
+                type: 'umd',
+            },
         },
         module:{
             rules:[

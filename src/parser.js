@@ -24,8 +24,8 @@ export function parseDOM(dom) {
       .filter((child) => child !== undefined);
 
     //判断是否是html
-    let ishtml =
-      dom.constructor !== HTMLUnknownElement && dom.constructor !== HTMLElement;
+    //let ishtml = dom.constructor !== HTMLUnknownElement && dom.constructor !== HTMLElement;
+    let ishtml = dom.constructor !== HTMLUnknownElement;
     return {
       type: "element",
       el: dom,

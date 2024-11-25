@@ -14,13 +14,21 @@
     <!-- <h1>欢迎使用QVM  ^_^!</h1> -->
     <!-- <div  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a+b" v-bind:value="b"  @click="fn(12,5)"> -->
     <div id="root" v-cloak>
+      <!-- filter过滤 -->
+      <div v-for="item,index in filterArr">
+        {{index}}--{{item.id}} --{{item.money}}
+      </div>
 
-      <cmp1 ref="ccc"></cmp1>
+
+      <!-- ref="ccc"调用 -->
+      <!-- <div class="b"></div>
+      <i class="a"></i>
+      <cmp1 ref="ccc"></cmp1> -->
 
 
 
-
-
+      <!-- 全局组件 -->
+      <!-- <cmp1 ref="ccc"></cmp1> -->
 
       <!-- router -->
       <!-- <router-link to="/a">页面1</router-link>
@@ -105,5 +113,6 @@
       <span class="" v-show="show"> aaaaaaaaaaaa </span> -->
     </div>
   </body>
-  <script src="/qvm.js" charset="UTF-8"></script>
+  <script src="/qvm.js" charset="UTF-8">
+  </script>
 </html>

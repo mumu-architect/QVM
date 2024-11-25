@@ -1,7 +1,7 @@
 {
-  "name": "qvm",
-  "version": "1.0.0",
-  "description": "",
+  "name": "q-qvm",
+  "version": "1.0.01",
+  "description": "Qvm是一个mvvm框架",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

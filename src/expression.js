@@ -19,7 +19,7 @@ const keyword = {
  * @param {*} data
  */
 export function expr(str, data) {
-  //TODO:filters未开发
+  //TODO:filters未开发//不需要开发
   // assert(filters);
   // let strArr=str.split('|');
   // str = strArr[0];
@@ -80,8 +80,6 @@ export function expr(str, data) {
 }
 
 export function compileStringTemplate(str, data) {
-
-  //assert(filters);
   
   let s = 0;
   //{{xxx}}
