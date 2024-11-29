@@ -25,7 +25,9 @@ export function parseDOM(dom) {
 
     //判断是否是html
     //let ishtml = dom.constructor !== HTMLUnknownElement && dom.constructor !== HTMLElement;
-    let ishtml = dom.constructor !== HTMLUnknownElement;
+
+    //自定义标签加中划线
+    let ishtml = dom.constructor !== HTMLUnknownElement && !(tag.indexOf("-")!==-1);
     return {
       type: "element",
       el: dom,

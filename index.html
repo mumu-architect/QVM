@@ -13,18 +13,19 @@
   <body>
     <!-- <h1>欢迎使用QVM  ^_^!</h1> -->
     <!-- <div  class="box aaa" v-show="aaa" v-if="bb" v-once  title="aa" :a="12" :a="5" v-bind:title="a+b" v-bind:value="b"  @click="fn(12,5)"> -->
-    <div id="root" v-cloak>
+    <!-- <div id="root" v-cloak> -->
+    <div id="root">
       <!-- filter过滤 -->
-      <div v-for="item,index in filterArr">
+      <!-- <div v-for="item,index in filterArr">
         {{index}}--{{item.id}} --{{item.money}}
-      </div>
+      </div> -->
 
 
       <!-- ref="ccc"调用 -->
       <!-- <div class="b"></div>
-      <i class="a"></i>
-      <cmp1 ref="ccc"></cmp1> -->
-
+      <i class="a"></i> -->
+      <qrow ref="ccc"></qrow>
+      <q-row ref="ccc"></q-row>
 
 
       <!-- 全局组件 -->
